@@ -57,8 +57,40 @@ nuc = nuc_cropped;
 
 
 % diff_measurements = DiffMeasurements(SubsetTable);
+
 %% Calc Differetial Measurements between T and T+1
 raw_differences = {};
+
+%
+% EXPLAINATION OF THE DIFFERENCES DATA STRUCTURE
+%
+% Example:
+%
+%    raw_differences =
+%    
+%      1×4 cell array
+%    
+%        [3×2 double]    [3×3 double]    [3×3 double]    [3×3 double]
+%
+% Example Explained:
+%
+%    raw_differences =
+%    
+%      1×4 cell array
+%     
+%      -In this example there are 5 timepoints, T1 to T5.
+%      -Differences between timepoints are stored as a matrix in the cell array.
+%      -The matrix size is large enough to compare all cells at timepoint T to all cells at T+1.
+%      -Each value in the matrix contains the difference between one cell at timepoint T and one cell at T+1.
+%      -Each cell at timepoint T is represented as a has a column in the matrix and each value 
+%       in the cell's column is the observed difference to a cell at timepoint T+1.
+%
+%           T1-->T2        T2-->T3         T3-->T4         T4-->T5
+%        [3×2 double]    [3×3 double]    [3×3 double]    [3×3 double]
+%        /  \                            /  \
+%       /   number of cells at T1       /   number of cells at T3
+%    number of cells at T2           number of cells at T4
+
 for t=1:max(SubsetTable.Ti)-1
   T1 = SubsetTable(SubsetTable.Ti==t,:);
   T2 = SubsetTable(SubsetTable.Ti==t+1,:);
@@ -137,33 +169,30 @@ for t=1:length(normalized_differences)
 end
 
 %% FIND CELL TRACES
-% Initialize all trace IDs to NaN
-SubsetTable.TraceID = nan(height(SubsetTable),1);
-% For the first frame, initialize trace IDs to to 1,2,3,etc.
-SubsetTable.TraceID(1:sum(SubsetTable.Ti==1)) = 1:sum(SubsetTable.Ti==1);
-%% CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS BETWEEN T AND T+1
+% Initialize all trace IDs to None
+SubsetTable(:,{'Trace'}) = {'None'};
+% For the first frame initialize the cell traces to a random UUID
+SubsetTable.Trace(1:sum(SubsetTable.Ti==1)) = uuid_array(sum(SubsetTable.Ti==1))';
+% CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS BETWEEN T AND T+1
 for timepoint=1:length(composite_differences)
   differences = composite_differences{timepoint};
   % Loop over difference matrix finding closest matches until no more matches can be made.
-  % The intersection (m,n) in the differences matrix stores the difference/similarity between cell parent m and child n.
+  % The intersection (m,n) in the differences matrix stores the difference/similarity between former cell m and current cell n. Also see the longer description of the differences data structure above.
   while any(differences)
     [row column] = find(differences==min(differences(:))); % CLOSEST MATCH
-    parent_cell_id = column;
-    child_cell_id = row;
-    differences(:, parent_cell_id) = NaN; % MARK PARENT AS MATCHED
+    former_cell_index = column;
+    current_cell_index = row;
+    differences(current_cell_index,former_cell_index) = NaN;
+    % In the differences matrix, mark the whole column that corrosponds to the
+    % former cell as NaN. This signifies that a match has been found for this
+    % former cell.
+    % differences(:,former_cell_index) = NaN;
 
-    % Find parent trace ID
-    T1 = SubsetTable.Ti==timepoint;
-    idx = find(T1==1,parent_cell_id,'first');
-    idx = idx(end);
-    parent_trace_id = SubsetTable{idx,{'TraceID'}};
+    [former_trace former_cell_index_global] = find_trace(SubsetTable, timepoint, former_cell_index);
+    [current_trace current_cell_index_global] = find_trace(SubsetTable, timepoint+1, current_cell_index);
 
-    % Set child trace ID to parent trace ID
-    T2 = SubsetTable.Ti==timepoint+1;
-    idx = find(T2==1,child_cell_id,'first');
-    idx = idx(end);
-    if isnan(SubsetTable{idx,{'TraceID'}})% the first time we set the TraceID is the best match
-      SubsetTable.TraceID(idx) = parent_trace_id;
+    if strcmp(current_trace,'None') % only set the trace to the best/first match
+      SubsetTable.Trace(current_cell_index_global) = former_trace
     end
   end
 end
@@ -177,8 +206,10 @@ for t=1:max(SubsetTable.Ti)
     Object = ObjectsInFrame(i,:);
     x = floor(Object.Ycoord);
     y = floor(Object.Xcoord);
-    trace_id=0;
-    trace_id_im = text2im(num2str(Object.TraceID));
+    trace = Object.Trace{:};
+    TRACEID_DIPSLAY_LEN = 2;
+    trace = trace(1:TRACEID_DIPSLAY_LEN);
+    trace_id_im = text2im(trace);
     trace_id_im = imresize(trace_id_im ,1);
     labelled_nuc(x:x-1+size(trace_id_im,1),y:y-1+size(trace_id_im,2),t)=trace_id_im*max(nuc(:))*0.8; % overlay text
   end
