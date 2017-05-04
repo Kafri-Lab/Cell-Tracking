@@ -6,20 +6,20 @@ addpath '\\carbon.research.sickkids.ca\rkafri\DanielS\cell_tracking\code\functio
 %load('\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Processed OutPutFiles\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
 
 % Images path
-folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammalian cells\20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1\Images\'
+folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammalian cells\20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1\Images\';
 
 
 row = 2;
 column = 4;
 field = 12;
 max_time = 6;
+plate_region = sprintf('r%02dc%02df%02dp01', row, column, field); % example result: r02c04f12p01
 rows = ResultTable.Ri==row & ResultTable.Ci==column & ResultTable.Fi==field & ResultTable.Ti<max_time;
 SubsetTable = ResultTable(rows,:);
-plate_region = 'r02c04f12p01';
 
 %% LOAD NUC
 channel = 3;
-t = 1;
+timepoint = 1;
 filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, timepoint)]; % load image at time 0
 firstImg = imread(filename,1);
 nuc = zeros(size(firstImg, 1), size(firstImg, 2), max(SubsetTable.Ti));
@@ -42,6 +42,19 @@ for i=2:max(SubsetTable.Ti)
   cyto(:,:,i) = imread(filename,1);
 end
 figure; imshow3D(cyto,[]);
+
+
+crop_amount=350;
+nuc_cropped = nuc(1:crop_amount,1:crop_amount,:);
+figure; imshow3D(nuc_cropped,[]);
+rows = SubsetTable.Xcoord<crop_amount & SubsetTable.Ycoord<crop_amount;
+CroppedTable = SubsetTable(rows,:);
+SubsetTable_orig = SubsetTable;
+SubsetTable = CroppedTable;
+
+nuc_orig = nuc;
+nuc = nuc_cropped;
+
 
 % diff_measurements = DiffMeasurements(SubsetTable);
 %% Calc Differetial Measurements between T and T+1
@@ -126,10 +139,8 @@ end
 %% FIND CELL TRACES
 % Initialize all trace IDs to NaN
 SubsetTable.TraceID = nan(height(SubsetTable),1);
-
 % For the first frame, initialize trace IDs to to 1,2,3,etc.
 SubsetTable.TraceID(1:sum(SubsetTable.Ti==1)) = 1:sum(SubsetTable.Ti==1);
-
 %% CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS BETWEEN T AND T+1
 for timepoint=1:length(composite_differences)
   differences = composite_differences{timepoint};
@@ -137,9 +148,9 @@ for timepoint=1:length(composite_differences)
   % The intersection (m,n) in the differences matrix stores the difference/similarity between cell parent m and child n.
   while any(differences)
     [row column] = find(differences==min(differences(:))); % CLOSEST MATCH
-    differences(row, column) = NaN; % IGNORE THIS MATCH ON NEXT LOOP
     parent_cell_id = column;
     child_cell_id = row;
+    differences(:, parent_cell_id) = NaN; % MARK PARENT AS MATCHED
 
     % Find parent trace ID
     T1 = SubsetTable.Ti==timepoint;
@@ -157,7 +168,7 @@ for timepoint=1:length(composite_differences)
   end
 end
 
-%% Overlay text2im
+%% Overlay on nuc
 labelled_nuc = nuc;
 for t=1:max(SubsetTable.Ti)
   ObjectsInFrame = SubsetTable(SubsetTable.Ti==t,:);
@@ -169,24 +180,11 @@ for t=1:max(SubsetTable.Ti)
     trace_id=0;
     trace_id_im = text2im(num2str(Object.TraceID));
     trace_id_im = imresize(trace_id_im ,1);
-    labelled_nuc(x:x-1+size(trace_id_im,1),y:y-1+size(trace_id_im,2),t)=trace_id_im*max(nuc(:)); % overlay text
+    labelled_nuc(x:x-1+size(trace_id_im,1),y:y-1+size(trace_id_im,2),t)=trace_id_im*max(nuc(:))*0.8; % overlay text
   end
 end
 figure; imshow3D(labelled_nuc,[]);
 
-%% SAVE GIF TO DISK
-date_str = datestr(now,'yyyymmddTHHMMSS');
-filename = [date_str '.gif'];
-for t=1:max(SubsetTable.Ti)
-    if t==1;
-      imwrite(labelled_nuc(:,:,t)./12,filename,'gif', 'DelayTime',0.5, 'Loopcount',inf);
-    else
-      imwrite(labelled_nuc(:,:,t)./12,filename,'gif', 'DelayTime',0.5, 'WriteMode','append');
-    end
-end
 
-shortestpathtree(fully_connected_graph,end_nodes,start_nodes) % find all shortest paths from end points to start points
-traces = T1Tracking(DiffMeasurementsTable)
-% traces = AllCombinationsTracking(DiffMeasurementsTable)
-Visualization1(traces)
-folder_short = strrep(char(folder),'\','');
+
+
