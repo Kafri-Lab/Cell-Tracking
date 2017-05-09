@@ -34,7 +34,8 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
   %% RAW DIFFERENCES
   raw_differences = {};
 
-  for t=1:max(SubsetTable.Ti)-1
+  count = 1;
+  for t=min(SubsetTable.Ti):max(SubsetTable.Ti)-1
     T1 = SubsetTable(SubsetTable.Ti==t,:);
     T2 = SubsetTable(SubsetTable.Ti==t+1,:);
 
@@ -44,35 +45,37 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
     Y_translation = squareform(pdist([T1.Ycoord;T2.Ycoord]));
     Y_translation=Y_translation(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing translation
     [theta,rho] = cart2pol(X_translation,Y_translation);
-    raw_differences{t}.Translation = rho;
+    raw_differences{count}.Translation = rho;
 
     % Eccentricity differences
     eccentricity_diff = squareform(pdist([T1.Eccentricity;T2.Eccentricity]));
-    raw_differences{t}.Eccentricity = eccentricity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.Eccentricity = eccentricity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % Nuclear area differences
     area_diff = squareform(pdist([T1.N_Area;T2.N_Area]));
-    raw_differences{t}.Area = area_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.Area = area_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % MajorAxisLength differences
     MajorAxisLength_diff = squareform(pdist([T1.MajorAxisLength;T2.MajorAxisLength]));
-    raw_differences{t}.MajorAxisLength = MajorAxisLength_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.MajorAxisLength = MajorAxisLength_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % MinorAxisLength differences
     MinorAxisLength_diff = squareform(pdist([T1.MinorAxisLength;T2.MinorAxisLength]));
-    raw_differences{t}.MinorAxisLength = MinorAxisLength_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.MinorAxisLength = MinorAxisLength_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % Solidity differences
     Solidity_diff = squareform(pdist([T1.Solidity;T2.Solidity]));
-    raw_differences{t}.Solidity = Solidity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.Solidity = Solidity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % Orientation differences
     Orientation_diff = squareform(pdist([T1.Orientation;T2.Orientation]));
-    raw_differences{t}.Orientation = Orientation_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.Orientation = Orientation_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % Nuclear intensity differences
     nuc_intensity_diff = squareform(pdist([T1.N_Int3;T2.N_Int3]));
-    raw_differences{t}.Nuc_intensity = nuc_intensity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+    raw_differences{count}.Nuc_intensity = nuc_intensity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
+
+    count = count+1;
   end
 
   %% NORMALIZED DIFFERENCES
@@ -90,7 +93,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
 
   % Importance of each metric for when calculating composite distances
   weights = {};
-  weights.Translation = 3;
+  weights.Translation = 4;
   weights.Eccentricity = 1;
   weights.Area = 1;
   weights.MajorAxisLength = 1;

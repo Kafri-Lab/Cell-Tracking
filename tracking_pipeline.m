@@ -30,29 +30,38 @@ for i=2:max(SubsetTable.Ti)
 end
 figure; imshow3D(nuc,[]);
 
-%% LOAD CYTO
-channel = 1;
-t = 1;
-filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, timepoint)]; % load image at time 0
-firstImg = imread(filename,1);
-cyto = zeros(size(firstImg, 1), size(firstImg, 2), max(SubsetTable.Ti));
-cyto(:,:,1) = firstImg;
-for i=2:max(SubsetTable.Ti)
-  filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, i)];
-  cyto(:,:,i) = imread(filename,1);
-end
-figure; imshow3D(cyto,[]);
+% %% LOAD CYTO
+% channel = 1;
+% t = 1;
+% filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, timepoint)]; % load image at time 0
+% firstImg = imread(filename,1);
+% cyto = zeros(size(firstImg, 1), size(firstImg, 2), max(SubsetTable.Ti));
+% cyto(:,:,1) = firstImg;
+% for i=2:max(SubsetTable.Ti)
+%   filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, i)];
+%   cyto(:,:,i) = imread(filename,1);
+% end
+% figure; imshow3D(cyto,[]);
 
 %% CROP IMAGE AND DATASET TO BE SMALL ENOUGH TO DEBUG BY HAND
-crop_amount=350;
-nuc_cropped = nuc(1:crop_amount,1:crop_amount,:);
-figure; imshow3D(nuc_cropped,[]);
-rows = SubsetTable.Xcoord<crop_amount & SubsetTable.Ycoord<crop_amount;
-CroppedTable = SubsetTable(rows,:);
-SubsetTable_orig = SubsetTable;
-SubsetTable = CroppedTable;
-nuc_orig = nuc;
-nuc = nuc_cropped;
+% min_x = 1100;
+% max_x = 1280;
+% min_y = 580;
+% max_y = 750;
+% nuc_cropped = nuc(min_y:max_y,min_x:max_x,:);
+% figure; imshow3D(nuc_cropped,[]);
+% rows = SubsetTable.Xcoord<max_x & SubsetTable.Xcoord>min_x & SubsetTable.Ycoord>min_y & SubsetTable.Ycoord<max_y;
+% CroppedTable = SubsetTable(rows,:);
+% CroppedTable.Xcoord = CroppedTable.Xcoord - min_x;
+% CroppedTable.Ycoord = CroppedTable.Ycoord - min_y;
+% SubsetTable_orig = SubsetTable;
+% SubsetTable = CroppedTable;
+% nuc_orig = nuc;
+% nuc = nuc_cropped;
+% figure; imshow3D(nuc,[]);
+
+% ADD MITOSIS
+SubsetTable.Mitosis = zeros(height(SubsetTable),1);
 
 %% CALC DIFFERENCES BETWEEN FRAMES
 [raw_differences, normalized_differences, composite_differences] = DifferentialMeasurements(SubsetTable);
@@ -62,4 +71,4 @@ SubsetTable = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
 labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
-imgs_to_gif(labelled_imgs);
+%imgs_to_gif(labelled_imgs);
