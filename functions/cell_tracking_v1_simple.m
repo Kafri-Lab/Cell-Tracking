@@ -19,6 +19,7 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
       % former cell.
       differences(:,former_cell_index) = NaN;
 
+      % Find ID in results table using ID in differences matrix
       [former_trace_id, former_cell_index_global] = lookup_trace_id(CellsTable, timepoint+min(CellsTable.Ti)-1, former_cell_index);
       [current_trace_id, current_cell_index_global] = lookup_trace_id(CellsTable, timepoint+min(CellsTable.Ti), current_cell_index);
 

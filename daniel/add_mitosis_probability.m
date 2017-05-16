@@ -9,7 +9,6 @@ plate_region = sprintf('r%02dc%02df%02dp01', row, column, field); % example resu
 rows = ResultTable.Ri==row & ResultTable.Ci==column & ResultTable.Fi==field & ResultTable.Ti<=max_time & ResultTable.Ti>=min_time;
 SubsetTable = ResultTable(rows,:);
 
-%%% DEBUG
 %% LOAD NUC
 channel = 3;
 timepoint = 1;
@@ -58,3 +57,11 @@ end
 labelled_nuc = nuc;
 labelled_nuc(seed_mask==1)=max(nuc(:));
 figure; imshow3D(labelled_nuc,[]);
+
+%% ADD MITOSIS PROBABILITY
+SubsetTable.Mitosis = zeros(height(SubsetTable),1);
+SubsetTable.Mitosis(3) = 1;
+SubsetTable.Mitosis(4) = .8;
+SubsetTable.Mitosis(5) = .8;
+
+
