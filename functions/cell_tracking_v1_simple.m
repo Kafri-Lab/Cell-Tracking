@@ -5,8 +5,10 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
   % For the first frame (ie. min(CellsTable.Ti) initialize the cell traces to a random UUID
   first_timepoint_cells = 1:sum(CellsTable.Ti==min(CellsTable.Ti));
   CellsTable.Trace(first_timepoint_cells) = uuid_array(sum(CellsTable.Ti==min(CellsTable.Ti)))';
-  % CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS BETWEEN T AND T+1
+  % CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS FIRST BETWEEN T AND T+1
   for timepoint=1:length(composite_differences)
+    previous_timepoint = timepoint+min(CellsTable.Ti)-1;
+    current_timepoint = timepoint+min(CellsTable.Ti);
     differences = composite_differences{timepoint};
     % Loop over difference matrix finding closest matches until no more matches can be made.
     % The intersection (m,n) in the differences matrix stores the difference/similarity between former cell m and current cell n. Also see the longer description of the differences data structure above.
@@ -20,8 +22,8 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
       differences(:,former_cell_index) = NaN;
 
       % Find ID in results table using ID in differences matrix
-      [former_trace_id, former_cell_index_global] = lookup_trace_id(CellsTable, timepoint+min(CellsTable.Ti)-1, former_cell_index);
-      [current_trace_id, current_cell_index_global] = lookup_trace_id(CellsTable, timepoint+min(CellsTable.Ti), current_cell_index);
+      [former_trace_id, former_cell_index_global] = lookup_trace_id(CellsTable, previous_timepoint, former_cell_index);
+      [current_trace_id, current_cell_index_global] = lookup_trace_id(CellsTable, current_timepoint, current_cell_index);
 
       if strcmp(current_trace_id,'None') % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
         CellsTable.Trace(current_cell_index_global) = former_trace_id;
@@ -29,11 +31,14 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
     end
 
     %% MITOSIS CELLS
-    newborns_cells = find(CellsTable.Mitosis > 0.5 & CellsTable.Ti==timepoint+min(CellsTable.Ti) & strcmp(CellsTable.Trace,'None'));
+    % Find born cells that have a high mitosis probability in the current timepoint and have not been assigned a trace id
+    newborns_cells = find(CellsTable.Mitosis > 0.5 & CellsTable.Ti==current_timepoint & strcmp(CellsTable.Trace,'None'));
     % Find possible parent cells
     mitosis_cells = CellsTable.Mitosis > 0.5;
-    timepoint_cells = CellsTable.Ti==timepoint+min(CellsTable.Ti)-1;
-    PossibleParents = CellsTable(find(mitosis_cells & timepoint_cells),:);
+    previous_timepoint_cells = CellsTable.Ti==previous_timepoint;
+    PossibleParents = CellsTable(find(mitosis_cells & previous_timepoint_cells),:);
+    % Find closest parent to newboard distance
+    % TODO: Using more metrics than distance
     for i=1:length(newborns_cells)
       possible_newborn = CellsTable(newborns_cells(i),:);
       neighbour_distances = abs(PossibleParents.Xcoord-possible_newborn.Xcoord) + abs(PossibleParents.Ycoord-possible_newborn.Ycoord);
@@ -43,7 +48,7 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
 
     %% CELLS ENTERING FRAME
     % Give a trace ID to cells that were not matched
-    cells_entering_frame = CellsTable.Ti==timepoint+min(CellsTable.Ti) & strcmp(CellsTable.Trace,'None');
+    cells_entering_frame = CellsTable.Ti==current_timepoint & strcmp(CellsTable.Trace,'None');
     CellsTable.Trace(cells_entering_frame) = uuid_array(sum(cells_entering_frame));
   end
 

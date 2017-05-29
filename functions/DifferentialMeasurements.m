@@ -18,7 +18,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
   %    
   %      1×4 cell array
   %     
-  %      -In this example there are 5 timepoints, T1 to T5.
+  %      -In this example there are 5 timepoints, T1 to T5, there are four differeneces and thus four items in the cell array.
   %      -Differences between timepoints are stored as a matrix in the cell array.
   %      -The matrix size is large enough to compare all cells at timepoint T to all cells at T+1.
   %      -Each value in the matrix contains the difference between one cell at timepoint T and one cell at T+1.
@@ -34,8 +34,10 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
   %% RAW DIFFERENCES
   raw_differences = {};
 
-  count = 1;
+  count = 1; % this is needed because "t" in the loop may not start at 1, we could
+  % if we really wanted to start processing timepoints in the middle of the sequence
   for t=min(SubsetTable.Ti):max(SubsetTable.Ti)-1
+    % Get only cells (ie. table rows) at T and T+1
     T1 = SubsetTable(SubsetTable.Ti==t,:);
     T2 = SubsetTable(SubsetTable.Ti==t+1,:);
 
