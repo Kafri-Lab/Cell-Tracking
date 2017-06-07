@@ -7,15 +7,18 @@ load('\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Processed OutPutFile
 % Images path
 folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammalian cells\20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1\Images\';
 
-% Select data subset
+% Select data subset (only for quicker testing/debugging)
 row = 2;
 column = 4;
 field = 12;
 min_time = 1;
 max_time = 10;
 plate_region = sprintf('r%02dc%02df%02dp01', row, column, field); % example result: r02c04f12p01
-rows = ResultTable.Ri==row & ResultTable.Ci==column & ResultTable.Fi==field & ResultTable.Ti<=max_time & ResultTable.Ti>=min_time;
+rows = ResultTable.Row==row & ResultTable.Column==column & ResultTable.Field==field & ResultTable.Time<=max_time & ResultTable.Time>=min_time;
 SubsetTable = ResultTable(rows,:);
+if height(SubsetTable) == 0
+    error('Exiting... No cells found at the given combination of time, row, column, and field');
+end
 
 %% LOAD NUC
 % channel = 3;
@@ -62,7 +65,7 @@ SubsetTable = ResultTable(rows,:);
 % nuc = nuc_cropped;
 % figure; imshow3D(nuc,[]);
 
-% ADD MITOSIS
+% ADD FAKE MITOSIS VALUES
 SubsetTable.Mitosis = zeros(height(SubsetTable),1);
 
 %% CALC DIFFERENCES BETWEEN FRAMES
