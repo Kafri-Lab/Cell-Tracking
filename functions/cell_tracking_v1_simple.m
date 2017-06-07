@@ -32,9 +32,9 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
 
     %% MITOSIS CELLS
     % Find born cells that have a high mitosis probability in the current timepoint and have not been assigned a trace id
-    newborns_cells = find(CellsTable.Mitosis > 0.5 & CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None'));
+    newborns_cells = find(CellsTable.SaddlePoint > 100 & CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None'));
     % Find possible parent cells
-    mitosis_cells = CellsTable.Mitosis > 0.5;
+    mitosis_cells = CellsTable.SaddlePoint > 100;
     previous_timepoint_cells = CellsTable.Time==previous_timepoint;
     PossibleParents = CellsTable(find(mitosis_cells & previous_timepoint_cells),:);
     % Find closest parent to newboard distance
