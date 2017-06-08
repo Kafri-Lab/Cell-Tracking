@@ -9,10 +9,10 @@ folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammali
 
 % Select data subset (only for quicker testing/debugging)
 row = 2;
-column = 2;
-field = 2;
+column = 5;
+field = 10;
 min_time = 1;
-max_time = 1;
+max_time = 10;
 plate_region = sprintf('r%02dc%02df%02dp01', row, column, field); % example result: r02c04f12p01
 rows = ResultTable.Row==row & ResultTable.Column==column & ResultTable.Field==field & ResultTable.Time<=max_time & ResultTable.Time>=min_time;
 SubsetTable = ResultTable(rows,:);
@@ -33,7 +33,7 @@ for i=min(SubsetTable.Time):max(SubsetTable.Time)
   nuc(:,:,count) = imread(filename,1);
   count = count+1;
 end
-figure; imshow3D(nuc,[]);
+% figure; imshow3D(nuc,[]);
 
 % %% LOAD CYTO
 channel = 1;
@@ -46,7 +46,7 @@ for i=2:max(SubsetTable.Time)
   filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, i)];
   cyto(:,:,i) = imread(filename,1);
 end
-figure; imshow3D(cyto,[]);
+% figure; imshow3D(cyto,[]);
 
 %% CROP IMAGE AND DATASET TO BE SMALL ENOUGH TO DEBUG BY HAND
 % min_x = 1100;
