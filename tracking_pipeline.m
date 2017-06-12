@@ -2,7 +2,7 @@ set(0,'DefaultFigureWindowStyle','docked')
 addpath 'functions'
 
 % Results table
-load('\\carbon.research.sickkids.ca\rkafri\Heather\ResultsTables\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
+load('R:\Lior\ResultsTables\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
 
 % Images path
 folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammalian cells\20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1\Images\';
@@ -33,7 +33,7 @@ for i=min(SubsetTable.Time):max(SubsetTable.Time)
   nuc(:,:,count) = imread(filename,1);
   count = count+1;
 end
-% figure; imshow3D(nuc,[]);
+figure; imshow3D(nuc,[]);
 
 % %% LOAD CYTO
 channel = 1;
@@ -65,6 +65,15 @@ end
 % nuc = nuc_cropped;
 % figure; imshow3D(nuc,[]);
 
+% Calc x and y cell locations
+Ycoord = SubsetTable.Centroid(:,2);
+Xcoord = SubsetTable.Centroid(:,1);
+x = floor(Ycoord);
+y = floor(Xcoord);
+SubsetTable.Xcoord = x;
+SubsetTable.Ycoord = y;
+
+    
 %% CALC DIFFERENCES BETWEEN FRAMES
 [raw_differences, normalized_differences, composite_differences] = DifferentialMeasurements(SubsetTable);
 
@@ -73,5 +82,6 @@ SubsetTable = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
 labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
+%labelled_imgs = overlay_trace_colours_on_imgs(SubsetTable, nuc);
 imgs_to_gif(labelled_imgs);
 
