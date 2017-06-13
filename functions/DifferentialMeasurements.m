@@ -42,9 +42,9 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
     T2 = SubsetTable(SubsetTable.Time==t+1,:);
    
     % Tranlation distances between T and T+1
-    X_translation = squareform(pdist([T1.Xcoord;T2.Xcoord]));
+    X_translation = squareform(pdist([T1.Centroid(:,1);T2.Centroid(:,1)]));
     X_translation=X_translation(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing translation
-    Y_translation = squareform(pdist([T1.Ycoord;T2.Ycoord]));
+    Y_translation = squareform(pdist([T1.Centroid(:,2);T2.Centroid(:,2)]));
     Y_translation=Y_translation(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing translation
     [theta,rho] = cart2pol(X_translation,Y_translation);
     raw_differences{count}.Translation = rho;

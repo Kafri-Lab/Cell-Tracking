@@ -41,7 +41,7 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
     % TODO: Using more metrics than distance
     for i=1:length(newborns_cells)
       possible_newborn = CellsTable(newborns_cells(i),:);
-      neighbour_distances = abs(PossibleParents.Xcoord-possible_newborn.Xcoord) + abs(PossibleParents.Ycoord-possible_newborn.Ycoord);
+      neighbour_distances = abs(PossibleParents.Centroid(:,1)-possible_newborn.Centroid(:,1)) + abs(PossibleParents.Centroid(:,2)-possible_newborn.Centroid(:,2));
       ParentCell = PossibleParents(find(min(neighbour_distances)),:);
       CellsTable.Trace(newborns_cells(i)) = ParentCell.Trace;
     end

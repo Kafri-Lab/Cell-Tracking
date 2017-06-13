@@ -2,7 +2,7 @@ set(0,'DefaultFigureWindowStyle','docked')
 addpath 'functions'
 
 % Results table
-load('R:\Lior\ResultsTables\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
+load('R:\Heather\ResultsTables\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
 
 % Images path
 folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammalian cells\20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1\Images\';
@@ -38,7 +38,7 @@ figure; imshow3D(nuc,[]);
 % %% LOAD CYTO
 channel = 1;
 t = 1;
-filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, timepoint)]; % load image at time 0
+filename = [folder sprintf('%s-ch%dsk%dfk1fl1.tiff', plate_region, channel, min_time)]; % load image at time 0
 firstImg = imread(filename,1);
 cyto = zeros(size(firstImg, 1), size(firstImg, 2), max(SubsetTable.Time));
 cyto(:,:,1) = firstImg;
@@ -81,7 +81,7 @@ SubsetTable.Ycoord = y;
 SubsetTable = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
-labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
-%labelled_imgs = overlay_trace_colours_on_imgs(SubsetTable, nuc);
-imgs_to_gif(labelled_imgs);
+%labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
+labelled_coloured_imgs = overlay_trace_colours_on_imgs(SubsetTable, cyto);
+%imgs_to_gif(labelled_imgs);
 
