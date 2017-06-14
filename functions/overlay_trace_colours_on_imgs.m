@@ -1,21 +1,26 @@
-function coloured_imgs = overlay_trace_colours_on_imgs(CellsTable, imgs)
+function cyto_overlay = overlay_trace_colours_on_imgs(CellsTable, imgs)
   %labelled_by_trace = zeros(size(imgs,1), size(imgs,2), size(imgs,3), 4);  
-  imgs = imgs(:,:,1);
+%   imgs = imgs(:,:,1);
   
-  boundaries = CellsTable.nuc_boundaries(CellsTable.Time == 1); %boundaries of cells in one timepoint
+%   boundaries = CellsTable.nuc_boundaries(CellsTable.Time == 1); %boundaries of cells in one timepoint
   
-  
-  %for t=min(CellsTable.Time):max(CellsTable.Time)
-    
-    ObjectsInFrame = CellsTable(CellsTable.Time==1,:); %ResultTable for cells in frame
+   labelled_by_trace_id_this = zeros(size(imgs,1), size(imgs,2), size(imgs,3), 3);
+   
+ for t=min(CellsTable.Time):max(CellsTable.Time)
+
+%     boundaries = CellsTable.nuc_boundaries{t};
+    ObjectsInFrame = CellsTable(CellsTable.Time==t,:); %ResultTable for cells in frame
+    boundaries = ObjectsInFrame.nuc_boundaries;
     %boundaries = CellsTable.nuc_boundaries(CellsTable.Time == t);
     NumberOfCells = size(boundaries, 1);
-    labelled_by_trace_id_this = zeros(size(imgs,1), size(imgs,2), 3);
+    point_in_time = zeros(size(imgs,1), size(imgs,2), 3);
     
     for i=1:NumberOfCells
       Object = ObjectsInFrame(i,:);
       trace = Object.Trace{:};
       trace = strsplit(trace,'-');
+      
+%       imgs_rgb = 
       
       %calculate RGB values
       red = mod(sum(uint8(trace{1})),255);
@@ -29,9 +34,11 @@ function coloured_imgs = overlay_trace_colours_on_imgs(CellsTable, imgs)
 %       c = cat(3,a,a,a);
 %       d = cat(3,a,a,a);
       
-      labelled_by_trace_id_this(boundaries{i}) = red;
-      labelled_by_trace_id_this(boundaries{i}+prod(size(imgs))) = green;
-      labelled_by_trace_id_this(boundaries{i}+prod(size(imgs))*2) = blue;
+      
+      point_in_time(boundaries{i}) = red;
+      point_in_time(boundaries{i}+size(imgs,1)*size(imgs,2)) = green;
+      point_in_time(boundaries{i}+size(imgs,1)*size(imgs,2)*2) = blue;
+      
       
       %image looks grayscale after add colour; using this to debug
 %       b(:,:,1) = red;
@@ -44,22 +51,29 @@ function coloured_imgs = overlay_trace_colours_on_imgs(CellsTable, imgs)
 %       d(:,:,2) = 0;
 %       d(:,:,3) = blue;
       
-      labelled_by_trace_id_this = uint8(labelled_by_trace_id_this);
+      point_in_time = uint8(point_in_time);
       
       %fill in perimeter
-      labelled_by_trace_id_this(:,:,1) = imfill(labelled_by_trace_id_this(:,:,1),'holes');
-      labelled_by_trace_id_this(:,:,2) = imfill(labelled_by_trace_id_this(:,:,2),'holes');
-      labelled_by_trace_id_this(:,:,3) = imfill(labelled_by_trace_id_this(:,:,3),'holes');
+      point_in_time(:,:,1) = imfill(point_in_time(:,:,1),'holes');
+      point_in_time(:,:,2) = imfill(point_in_time(:,:,2),'holes');
+      point_in_time(:,:,3) = imfill(point_in_time(:,:,3),'holes');
     end
     
+    labelled_by_trace_id_this(:,:,t,:) = point_in_time;
     
-  %end
-  labelled_by_trace_id_this = uint8(labelled_by_trace_id_this);
-  figure; imshow(b, []);
-  figure; imshow(c, []);
-  figure; imshow(d, []);
-  figure; imshow3D(imgs,[]);
-  figure; imshow3D(labelled_by_trace_id_this,[]);
+  end
+%   labelled_by_trace_id_this = uint8(point_in_time);
+%   
+  cyto_rgb = cat(4, imgs, imgs, imgs); 
+  cyto_overlay = uint8(labelled_by_trace_id_this./2) ... % add segmented boundries
+             + uint8(cyto_rgb./12);           % add original cyto image
+         
+%   figure; imshow(b, []);
+%   figure; imshow(c, []);
+%   figure; imshow(d, []);
+%figure; imshow3D(labelled_by_trace_id_this,[]);  
+% figure; imshow3D(imgs,[]);
+%   figure; imshow3D(labelled_by_trace_id_this,[]);
   
 end 
   
