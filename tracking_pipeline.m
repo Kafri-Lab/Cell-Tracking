@@ -33,7 +33,7 @@ for i=min(SubsetTable.Time):max(SubsetTable.Time)
   nuc(:,:,count) = imread(filename,1);
   count = count+1;
 end
-figure; imshow3D(nuc,[]);
+%figure; imshow3D(nuc,[]);
 
 % %% LOAD CYTO
 channel = 1;

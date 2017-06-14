@@ -4,9 +4,9 @@ function images_to_gif(imgs)
   for t=1:size(imgs,3)
       [imind,cm] = rgb2ind(squeeze(imgs(:,:,t,:)),256);
         if t == 1;
-          imwrite(imind,cm,filename,'gif', 'DelayTime',0.1, 'Loopcount',inf);
+          imwrite(imind,cm,filename,'gif', 'DelayTime',0.4, 'Loopcount',inf);
         else
-           imwrite(imind,cm,filename,'gif', 'DelayTime',0.1, 'WriteMode','append');
+           imwrite(imind,cm,filename,'gif', 'DelayTime',0.4, 'WriteMode','append');
         end
       
       
