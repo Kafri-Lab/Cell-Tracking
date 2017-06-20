@@ -72,7 +72,6 @@ x = floor(Ycoord);
 y = floor(Xcoord);
 SubsetTable.Xcoord = x;
 SubsetTable.Ycoord = y;
-
     
 %% CALC DIFFERENCES BETWEEN FRAMES
 [raw_differences, normalized_differences, composite_differences] = DifferentialMeasurements(SubsetTable);
@@ -81,8 +80,8 @@ SubsetTable.Ycoord = y;
 SubsetTable = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
-%labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
-coloured_imgs = overlay_trace_colours_on_imgs(SubsetTable, cyto);
-%imgs_to_gif(coloured_imgs);
-%imgs_to_gif(labelled_imgs);
+labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
+coloured_imgs = overlay_cyto_and_nuc_on_cyto(SubsetTable, cyto);
+colour_imgs_to_gif(coloured_imgs);
+imgs_to_gif(labelled_imgs);
 

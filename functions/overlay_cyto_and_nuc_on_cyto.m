@@ -48,6 +48,8 @@ function overlay = overlay_cyto_and_nuc_on_cyto(CellsTable, imgs)
         point_in_time(:,:,2) = imfill(point_in_time(:,:,2),'holes');
         point_in_time(:,:,3) = imfill(point_in_time(:,:,3),'holes');
 
+        
+        
         %colour cyto
         for i=1:NumberOfCells
 
