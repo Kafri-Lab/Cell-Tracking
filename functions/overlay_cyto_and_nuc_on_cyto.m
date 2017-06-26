@@ -82,9 +82,9 @@ function overlay = overlay_cyto_and_nuc_on_cyto(CellsTable, imgs)
         hsv(:,:,3) = luminance;
         point_in_time = hsv2rgb(hsv);
 
-        point_in_time(:,:,1)=imdilate(point_in_time(:,:,1), offsetstrel('ball',4,40));
-        point_in_time(:,:,2)=imdilate(point_in_time(:,:,2), offsetstrel('ball',4,40));
-        point_in_time(:,:,3)=imdilate(point_in_time(:,:,3), offsetstrel('ball',4,40));
+        point_in_time(:,:,1)=imdilate(point_in_time(:,:,1), offsetstrel('ball',3,10));
+        point_in_time(:,:,2)=imdilate(point_in_time(:,:,2), offsetstrel('ball',3,10));
+        point_in_time(:,:,3)=imdilate(point_in_time(:,:,3), offsetstrel('ball',3,10));
         
         point_in_time = uint8(point_in_time);
         labelled_by_trace(:,:,t,:) = point_in_time;
