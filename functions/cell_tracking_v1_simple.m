@@ -39,10 +39,13 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
     PossibleParents = CellsTable(find(mitosis_cells & previous_timepoint_cells),:);
     % Find closest parent to newboard distance
     % TODO: Using more metrics than distance
+    PossibleParentsUpdated = PossibleParents;
     for i=1:length(newborns_cells)
       possible_newborn = CellsTable(newborns_cells(i),:);
-      neighbour_distances = abs(PossibleParents.Centroid(:,1)-possible_newborn.Centroid(:,1)) + abs(PossibleParents.Centroid(:,2)-possible_newborn.Centroid(:,2));
-      ParentCell = PossibleParents(find(min(neighbour_distances)),:);
+      neighbour_distances = sqrt(abs(PossibleParentsUpdated.Centroid(:,1)-possible_newborn.Centroid(:,1)).^2 + abs(PossibleParentsUpdated.Centroid(:,2)-possible_newborn.Centroid(:,2)).^2); %Heather added this
+      min(neighbour_distances)
+      ParentCell = PossibleParentsUpdated(find(min(neighbour_distances)),:);
+      PossibleParentsUpdated((find(min(neighbour_distances))),:)=[]; %Heather added this 
       CellsTable.Trace(newborns_cells(i)) = ParentCell.Trace;
     end
 

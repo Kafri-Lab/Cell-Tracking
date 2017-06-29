@@ -12,7 +12,7 @@ row = 2;
 column = 5;
 field = 10;
 min_time = 1;
-max_time = 10;
+max_time = 50;
 plate_region = sprintf('r%02dc%02df%02dp01', row, column, field); % example result: r02c04f12p01
 rows = ResultTable.Row==row & ResultTable.Column==column & ResultTable.Field==field & ResultTable.Time<=max_time & ResultTable.Time>=min_time;
 SubsetTable = ResultTable(rows,:);
@@ -81,7 +81,7 @@ SubsetTable = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
 labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
-coloured_imgs = overlay_cyto_and_nuc_on_cyto(SubsetTable, cyto);
+coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
 colour_imgs_to_gif(coloured_imgs);
 imgs_to_gif(labelled_imgs);
 

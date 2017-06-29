@@ -106,7 +106,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
 
   %% COMPOSITE DIFFERENCES
   composite_differences = {};
-  for t=1:length(normalized_differences)
+  for t=1:length(normalized_differences)    
     % composite_differences{t} = normalized_differences{t}.Translation .* weights.Translation;
     composite_differences{t} = normalized_differences{t}.Translation .* weights.Translation ...
                           + normalized_differences{t}.Eccentricity .* weights.Eccentricity ...
