@@ -1,1 +1,4 @@
 *.asv
+*.gif
+*.DS_Store
+*.db

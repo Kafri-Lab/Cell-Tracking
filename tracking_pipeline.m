@@ -12,7 +12,7 @@ row = 2;
 column = 5;
 field = 10;
 min_time = 1;
-max_time = 50;
+max_time = 20;
 plate_region = sprintf('r%02dc%02df%02dp01', row, column, field); % example result: r02c04f12p01
 rows = ResultTable.Row==row & ResultTable.Column==column & ResultTable.Field==field & ResultTable.Time<=max_time & ResultTable.Time>=min_time;
 SubsetTable = ResultTable(rows,:);
