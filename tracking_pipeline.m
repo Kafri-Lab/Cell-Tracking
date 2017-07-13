@@ -49,16 +49,25 @@ end
 % figure; imshow3D(cyto,[]);
 
 %% CROP IMAGE AND DATASET TO BE SMALL ENOUGH TO DEBUG BY HAND
+% if exist('nuc_orig')
+%   nuc = nuc_orig;
+% end
+% if exist('SubsetTable_orig')
+%   SubsetTable = SubsetTable_orig;
+% end
 % min_x = 1100;
 % max_x = 1280;
 % min_y = 580;
 % max_y = 750;
 % nuc_cropped = nuc(min_y:max_y,min_x:max_x,:);
 % figure; imshow3D(nuc_cropped,[]);
-% rows = SubsetTable.Xcoord<max_x & SubsetTable.Xcoord>min_x & SubsetTable.Ycoord>min_y & SubsetTable.Ycoord<max_y;
+% rows = SubsetTable.Centroid(:,1)<max_x & SubsetTable.Centroid(:,1)>min_x & SubsetTable.Centroid(:,2)>min_y & SubsetTable.Centroid(:,2)<max_y;
 % CroppedTable = SubsetTable(rows,:);
-% CroppedTable.Xcoord = CroppedTable.Xcoord - min_x;
-% CroppedTable.Ycoord = CroppedTable.Ycoord - min_y;
+% if height(SubsetTable) == 0
+%     error('Exiting... No cells found at the given combination of time, row, column, and field');
+% end
+% CroppedTable.Centroid(:,1) = CroppedTable.Centroid(:,1) - min_x;
+% CroppedTable.Centroid(:,2) = CroppedTable.Centroid(:,2) - min_y;
 % SubsetTable_orig = SubsetTable;
 % SubsetTable = CroppedTable;
 % nuc_orig = nuc;
