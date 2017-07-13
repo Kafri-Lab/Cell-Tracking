@@ -40,11 +40,11 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
     % Get only cells (ie. table rows) at T and T+1
     T1 = SubsetTable(SubsetTable.Time==t,:);
     T2 = SubsetTable(SubsetTable.Time==t+1,:);
-
+   
     % Tranlation distances between T and T+1
-    X_translation = squareform(pdist([T1.Xcoord;T2.Xcoord]));
+    X_translation = squareform(pdist([T1.Centroid(:,1);T2.Centroid(:,1)]));
     X_translation=X_translation(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing translation
-    Y_translation = squareform(pdist([T1.Ycoord;T2.Ycoord]));
+    Y_translation = squareform(pdist([T1.Centroid(:,2);T2.Centroid(:,2)]));
     Y_translation=Y_translation(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing translation
     [theta,rho] = cart2pol(X_translation,Y_translation);
     raw_differences{count}.Translation = rho;
@@ -54,7 +54,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
     raw_differences{count}.Eccentricity = eccentricity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % Nuclear area differences
-    area_diff = squareform(pdist([T1.N_Area;T2.N_Area]));
+    area_diff = squareform(pdist([T1.NArea;T2.NArea]));
     raw_differences{count}.Area = area_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % MajorAxisLength differences
@@ -74,7 +74,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
     raw_differences{count}.Orientation = Orientation_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     % Nuclear intensity differences
-    nuc_intensity_diff = squareform(pdist([T1.N_Int3;T2.N_Int3]));
+    nuc_intensity_diff = squareform(pdist([T1.NInt;T2.NInt]));
     raw_differences{count}.Nuc_intensity = nuc_intensity_diff(height(T1)+1:end,1:height(T1)); % produces matrix of size lenT1 x lenT2 containing differences
 
     count = count+1;
@@ -106,7 +106,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
 
   %% COMPOSITE DIFFERENCES
   composite_differences = {};
-  for t=1:length(normalized_differences)
+  for t=1:length(normalized_differences)    
     % composite_differences{t} = normalized_differences{t}.Translation .* weights.Translation;
     composite_differences{t} = normalized_differences{t}.Translation .* weights.Translation ...
                           + normalized_differences{t}.Eccentricity .* weights.Eccentricity ...
@@ -114,7 +114,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
                           + normalized_differences{t}.MajorAxisLength .* weights.MajorAxisLength ...
                           + normalized_differences{t}.MinorAxisLength .* weights.MinorAxisLength ...
                           + normalized_differences{t}.Solidity .* weights.Solidity ...
-                          + normalized_differences{t}.Orientation .* weights.Orientation ...
+                          + normalized_differences{t}.Orientation .* weights.Orientation...
                           + normalized_differences{t}.Nuc_intensity .* weights.Nuc_intensity;
   end
 end

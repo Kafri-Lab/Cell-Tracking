@@ -1,2 +1,5 @@
 *.asv
+*.gif
+*.DS_Store
+*.db
 daniel/ignore
