@@ -15,6 +15,7 @@ function CellsTable = cell_tracking_v1_simple(CellsTable, composite_differences)
     while any(differences(:))
       % Find pair that is least different
       [current_cell_index, former_cell_index] = find(differences==min(differences(:))); % MATCH FOUND
+      % TODO: Handle multiple matches found
 
       % In the differences matrix, mark the whole column that corrosponds to the
       % former cell as NaN. This signifies that a match has been found for this
