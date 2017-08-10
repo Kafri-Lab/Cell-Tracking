@@ -19,6 +19,7 @@ SubsetTable = ResultTable(rows,:);
 if height(SubsetTable) == 0
     error('Exiting... No cells found at the given combination of time, row, column, and field');
 end
+SubsetTable.TraceUsed(:,1)=0;
 
 %% LOAD NUC
 channel = 3;
@@ -86,11 +87,11 @@ SubsetTable.Ycoord = y;
 [raw_differences, normalized_differences, composite_differences] = DifferentialMeasurements(SubsetTable);
 
 %% TRACK CELLS
-SubsetTable = cell_tracking_v1_simple(SubsetTable, composite_differences);
+[SubsetTable] = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
-labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
-coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
-colour_imgs_to_gif(coloured_imgs);
-imgs_to_gif(labelled_imgs);
+% labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
+% coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
+% colour_imgs_to_gif(coloured_imgs);
+% imgs_to_gif(labelled_imgs);
 
