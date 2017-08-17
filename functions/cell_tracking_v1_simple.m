@@ -1,7 +1,6 @@
 function [CellsTable] = cell_tracking_v1_simple(CellsTable, composite_differences)
   %% FIND CELL TRACES
   % Initialize all trace IDs to None
-
   diffTable=table(0,0,{''}); % used to aid debugging
   CellsTable(:,{'Trace'}) = {'None'};
   % For the first frame (ie. min(CellsTable.Time) initialize the cell traces to a random UUID
@@ -64,16 +63,17 @@ function [CellsTable] = cell_tracking_v1_simple(CellsTable, composite_difference
         % Find closest parent to newboard distance
         % TODO: Using more metrics than distance
         PossibleParentsUpdated = PossibleParents;
-        for i=1:length(newborns_cells)
-          possible_newborn = CellsTable(newborns_cells(i),:);
-          neighbour_distances = sqrt(abs(PossibleParentsUpdated.Centroid(:,1)-possible_newborn.Centroid(:,1)).^2 + abs(PossibleParentsUpdated.Centroid(:,2)-possible_newborn.Centroid(:,2)).^2); %euclidean distance
-          closest_neighbour_id = find(min(neighbour_distances));
-          ParentCell = PossibleParentsUpdated(closest_neighbour_id,:);
-          PossibleParentsUpdated((closest_neighbour_id),:)=[]; %removes row pertaining to the parent cell so that it is only matched with one newborn cell
-          CellsTable.Trace(newborns_cells(i)) = ParentCell.Trace;
-          ParentCell.TraceUsed=1;
+        if isempty(PossibleParents)~=1
+            for i=1:length(newborns_cells)
+              possible_newborn = CellsTable(newborns_cells(i),:);
+              neighbour_distances = sqrt(abs(PossibleParentsUpdated.Centroid(:,1)-possible_newborn.Centroid(:,1)).^2 + abs(PossibleParentsUpdated.Centroid(:,2)-possible_newborn.Centroid(:,2)).^2); %euclidean distance
+              closest_neighbour_id = find(min(neighbour_distances));
+              ParentCell = PossibleParentsUpdated(closest_neighbour_id,:);
+              PossibleParentsUpdated((closest_neighbour_id),:)=[]; %removes row pertaining to the parent cell so that it is only matched with one newborn cell
+              CellsTable.Trace(newborns_cells(i)) = ParentCell.Trace;
+              ParentCell.TraceUsed=1;
+            end
         end
-    
     %% CELLS ENTERING FRAME
     % Give a trace ID to cells that were not matched
     cells_entering_frame = CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None');
