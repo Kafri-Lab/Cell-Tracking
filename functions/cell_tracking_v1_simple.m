@@ -1,7 +1,11 @@
-function [CellsTable] = cell_tracking_v1_simple(CellsTable, composite_differences)
+function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_differences)
   %% FIND CELL TRACES
   % Initialize all trace IDs to None
-  diffTable=table(0,0,{''}); % used to aid debugging
+  Interval=[];
+  TraceId={};
+  Difference=[];
+  Centroid_Difference=[];
+  diffTable=table(Interval,TraceId,Difference,Centroid_Difference); % used to aid debugging
   CellsTable(:,{'Trace'}) = {'None'};
   % For the first frame (ie. min(CellsTable.Time) initialize the cell traces to a random UUID
   first_timepoint_cells = 1:sum(CellsTable.Time==min(CellsTable.Time));
@@ -17,35 +21,30 @@ function [CellsTable] = cell_tracking_v1_simple(CellsTable, composite_difference
       
       %%
       % Find pair that is least different
-      [current_cell_index, former_cell_index] = find(differences==min(differences(:))); % MATCH FOUND
+          [current_cell_index, former_cell_index] = find(differences==min(differences(:))); % MATCH FOUND
 
-      % TODO: Handle multiple exact matches found
-      mindiff=min(differences(:));
-      % In the differences matrix, mark the whole column that corrosponds to the
-      % former cell as NaN. This signifies that a match has been found for this
-      % former cell. Also, mark the whole row that corresponds to the
-      % current cell as NaN. This signifies that a match has been found for
-      % this current cell.
-      differences(:,former_cell_index) = NaN;
-      differences(current_cell_index,:) = NaN;
+          % TODO: Handle multiple exact matches found
+          mindiff=min(differences(:));
+          % In the differences matrix, mark the whole column that corrosponds to the
+          % former cell as NaN. This signifies that a match has been found for this
+          % former cell. Also, mark the whole row that corresponds to the
+          % current cell as NaN. This signifies that a match has been found for
+          % this current cell.
+          differences(:,former_cell_index) = NaN;
+          differences(current_cell_index,:) = NaN;
 
-      % Find ID in results table using ID in differences matrix
-      [former_trace_id, former_cell_index_global] = lookup_trace_id(CellsTable, previous_timepoint, former_cell_index);
-      [current_trace_id, current_cell_index_global] = lookup_trace_id(CellsTable, current_timepoint, current_cell_index);
-      newRow = {previous_timepoint,mindiff,former_trace_id}; % used to aid debugging
-      diffTable=[diffTable;newRow]; % used to aid debugging
+          % Find ID in results table using ID in differences matrix
+          [former_trace_id, former_cell_index_global] = lookup_trace_id(CellsTable, previous_timepoint, former_cell_index);
+          [current_trace_id, current_cell_index_global] = lookup_trace_id(CellsTable, current_timepoint, current_cell_index);
+          
+          centroid_diff=sqrt((abs(CellsTable.Centroid(current_cell_index_global,1)-CellsTable.Centroid(former_cell_index_global,1))).^2 + (abs(CellsTable.Centroid(current_cell_index_global,2)-CellsTable.Centroid(former_cell_index_global,2))).^2);
+          newRow = {previous_timepoint,former_trace_id,mindiff,centroid_diff}; % used to aid debugging
+          diffTable=[diffTable;newRow]; % used to aid debugging
 
-      if strcmp(current_trace_id,'None') % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
-        CellsTable.Trace(current_cell_index_global) = former_trace_id;
-        CellsTable.TraceUsed(former_cell_index_global) = 1;
-      end
-      
-      mindiff
-      former_trace_id
-      former_cell_index_global
-      current_trace_id
-      current_cell_index_global
-      
+          if strcmp(current_trace_id,'None') % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
+            CellsTable.Trace(current_cell_index_global) = former_trace_id;
+            CellsTable.TraceUsed(former_cell_index_global) = 1;
+          end
     end
 
     %% MITOSIS CELLS
@@ -79,7 +78,4 @@ function [CellsTable] = cell_tracking_v1_simple(CellsTable, composite_difference
     cells_entering_frame = CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None');
     CellsTable.Trace(cells_entering_frame) = uuid_array(sum(cells_entering_frame));
   end
-  
-  diffTable % used to aid debugging
-
 end

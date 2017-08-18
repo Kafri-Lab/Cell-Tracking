@@ -87,11 +87,11 @@ SubsetTable.Ycoord = y;
 [raw_differences, normalized_differences, composite_differences] = DifferentialMeasurements(SubsetTable);
 
 %% TRACK CELLS
-[SubsetTable] = cell_tracking_v1_simple(SubsetTable, composite_differences);
+[SubsetTable,DiffTable] = cell_tracking_v1_simple(SubsetTable, composite_differences);
 
 %% DEBUG
 labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
-% coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
+coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
 % colour_imgs_to_gif(coloured_imgs);
 % imgs_to_gif(labelled_imgs);
 
