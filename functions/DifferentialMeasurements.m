@@ -95,7 +95,7 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
 
   % Importance of each metric for when calculating composite distances
   weights = {};
-  weights.Translation = 4;
+  weights.Translation = 5;
   weights.Eccentricity = 1;
   weights.Area = 1;
   weights.MajorAxisLength = 1;

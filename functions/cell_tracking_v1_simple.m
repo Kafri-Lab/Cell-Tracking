@@ -17,10 +17,15 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
     differences = composite_differences{timepoint};
     % Loop over difference matrix finding closest matches until no more matches can be made.
     % The intersection (m,n) in the differences matrix stores the difference/similarity between former cell m and current cell n. Also see the longer description of the differences data structure above.
+    count=0;
     while any(differences(:))
       
       %%
+      if timepoint==3
+          count=count+1;
+      end 
       % Find pair that is least different
+          
           [current_cell_index, former_cell_index] = find(differences==min(differences(:))); % MATCH FOUND
 
           % TODO: Handle multiple exact matches found
@@ -41,7 +46,9 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
           newRow = {previous_timepoint,former_trace_id,mindiff,centroid_diff}; % used to aid debugging
           diffTable=[diffTable;newRow]; % used to aid debugging
 
-          if strcmp(current_trace_id,'None') % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
+          if strcmp(current_trace_id,'None') & mindiff>1.3 & centroid_diff>104 % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
+            CellsTable.Trace(current_cell_index_global) = {uuid()};
+          elseif strcmp(current_trace_id,'None')
             CellsTable.Trace(current_cell_index_global) = former_trace_id;
             CellsTable.TraceUsed(former_cell_index_global) = 1;
           end
