@@ -13,39 +13,13 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
   % CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS FIRST BETWEEN T AND T+1
   for timepoint=1:19%length(composite_differences)
     previous_timepoint = timepoint+min(CellsTable.Time)-1;
-    current_timepoint = timepoint+min(CellsTable.Time);
+    current_timepoint = timepoint+min(CellsTable.Time); 
     differences = composite_differences{timepoint};
-    if timepoint>1
-        lostCellsTable = CellsTable(CellsTable.TraceUsed==0 & CellsTable.Time==previous_timepoint-1,:);
-        currentTimepointTable = CellsTable(CellsTable.Time==current_timepoint,:);
-        for i=1:size(lostCellsTable,1)
-            lostCell_X = lostCellsTable.Centroid(i,1);
-            lostCell_Y = lostCellsTable.Centroid(i,2);
-            centroid_diffs=[];
-            for j=1:size(currentTimepointTable)
-                currentCell_X = currentTimepointTable.Centroid(j,1);
-                currentCell_Y = currentTimepointTable.Centroid(j,2);
-                centroid_diff = sqrt((lostCell_X-currentCell_X).^2 + (lostCell_Y-currentCell_Y).^2);
-                centroid_diffs=[centroid_diffs;centroid_diff];
-            end
-            closest_cell_index=find(centroid_diffs==min(centroid_diffs));
-            if min(centroid_diffs)<200 
-                [global_lostCell_index] = find_index(CellsTable,previous_timepoint-1,0,i);
-                [global_currentCell_index] = find_index(CellsTable,current_timepoint,0,closest_cell_index);
-                if strcmp(CellsTable.Trace(global_currentCell_index),'None')
-                    CellsTable.Trace(global_currentCell_index)=CellsTable.Trace(global_lostCell_index);
-                    CellsTable.TraceUsed(global_lostCell_index)==1;
-                end
-            end 
-        end
-    end
-    
-    % Loop over difference matrix finding closest matches until no more matches can be made.
+    %% Loop over difference matrix finding closest matches until no more matches can be made.
     % The intersection (m,n) in the differences matrix stores the difference/similarity between former cell m and current cell n. Also see the longer description of the differences data structure above.
     count=0;
-    while any(differences(:))
-      
-      %%
+    while any(differences(:))    
+     
       if timepoint==3
           count=count+1;
       end 
@@ -72,14 +46,39 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
           diffTable=[diffTable;newRow]; % used to aid debugging
 
           if strcmp(current_trace_id,'None') & mindiff>2 & centroid_diff>200 % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
-            CellsTable.Trace(current_cell_index_global) = {uuid()};
-          elseif strcmp(current_trace_id,'None')
+            %CellsTable.Trace(current_cell_index_global) = {uuid()};
+          elseif strcmp(current_trace_id,'None') & mindiff<2 & centroid_diff<200
             CellsTable.Trace(current_cell_index_global) = former_trace_id;
             CellsTable.TraceUsed(former_cell_index_global) = 1;
           end
     end
-
-    %% MITOSIS CELLS
+    %% RESEGMENTED CELLS 
+    if timepoint>1
+        lostCellsTable = CellsTable(CellsTable.TraceUsed==0 & CellsTable.Time==previous_timepoint-1,:);
+        currentTimepointTable = CellsTable(CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None'),:);
+        for i=1:size(lostCellsTable,1)
+            lostCell_X = lostCellsTable.Centroid(i,1);
+            lostCell_Y = lostCellsTable.Centroid(i,2);
+            centroid_diffs=[];
+            for j=1:size(currentTimepointTable,1)
+                currentCell_X = currentTimepointTable.Centroid(j,1);
+                currentCell_Y = currentTimepointTable.Centroid(j,2);
+                centroid_diff = sqrt((lostCell_X-currentCell_X).^2 + (lostCell_Y-currentCell_Y).^2);
+                centroid_diffs=[centroid_diffs;centroid_diff];
+            end
+            closest_cell_index=find(centroid_diffs==min(centroid_diffs));
+            if min(centroid_diffs)<200 %& mindiff<2 
+                [global_lostCell_index] = find_index(CellsTable,previous_timepoint-1,0,i);
+                [global_currentCell_index] = find_index(CellsTable,current_timepoint,0,closest_cell_index,'None');
+                if strcmp(CellsTable.Trace(global_currentCell_index),'None')
+                    CellsTable.Trace(global_currentCell_index)=CellsTable.Trace(global_lostCell_index);
+                    CellsTable.TraceUsed(global_lostCell_index)=1;
+                    currentTimepointTable(j,:) = [];
+                end
+            end 
+        end
+    end
+    %% MITOTIC CELLS
     % Find born cells that have a high mitosis probability in the current timepoint and have not been assigned a trace id
     newborns_cells = find(CellsTable.SaddlePoint > 50 & CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None'));
     %Check if there are any newborn cells. If not, continue to next
@@ -106,10 +105,10 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
                 ParentCell.TraceUsed=1;
               end
             end
-        end
+        end    
     %% CELLS ENTERING FRAME
     % Give a trace ID to cells that were not matched
-    cells_entering_frame = CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None');
-    CellsTable.Trace(cells_entering_frame) = uuid_array(sum(cells_entering_frame));
+     cells_entering_frame = CellsTable.Time==current_timepoint & strcmp(CellsTable.Trace,'None');
+     CellsTable.Trace(cells_entering_frame) = uuid_array(sum(cells_entering_frame));
   end
 end
