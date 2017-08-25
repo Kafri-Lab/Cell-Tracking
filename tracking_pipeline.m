@@ -1,8 +1,8 @@
 set(0,'DefaultFigureWindowStyle','docked')
-addpath 'functions'
+addpath(genpath('functions'))
 
 % Results table
-load('R:\Heather\ResultsTables\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
+load('\\carbon.research.sickkids.ca\rkafri\Heather\ResultsTables\Dataset_20170322_TG_Fibroblast_movie_2RESULTS\ResultTable.mat')
 
 % Images path
 folder = '\\carbon.research.sickkids.ca\rkafri\OPRETTA\Operetta Raw Data\Mammalian cells\20170322_TG_Fibroblast_movie_2__2017-03-22T17_52_56-Measurement1\Images\';
@@ -95,3 +95,5 @@ coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
 % colour_imgs_to_gif(coloured_imgs);
 % imgs_to_gif(labelled_imgs);
 
+% PLOT
+frame_to_frame_changes(SubsetTable);
