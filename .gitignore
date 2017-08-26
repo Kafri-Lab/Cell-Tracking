@@ -3,5 +3,6 @@
 *.DS_Store
 *.db
 *.png
+*.mat
 daniel/ignore
 
