@@ -92,8 +92,10 @@ SubsetTable.Ycoord = y;
 %% DEBUG
 labelled_imgs = overlay_trace_ids_on_imgs(SubsetTable, nuc);
 coloured_imgs = overlay_nuc_and_nuc(SubsetTable, cyto);
-% colour_imgs_to_gif(coloured_imgs);
-% imgs_to_gif(labelled_imgs);
+colour_imgs_to_gif(coloured_imgs);
+imgs_to_gif(labelled_imgs);
+colour_imgs_to_gif(overlay_cyto_on_cyto(SubsetTable, cyto));
+colour_imgs_to_gif(overlay_cyto_and_nuc_on_cyto(SubsetTable, cyto));
 
 % PLOT
 frame_to_frame_changes(SubsetTable);

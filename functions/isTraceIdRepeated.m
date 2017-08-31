@@ -20,13 +20,3 @@ function isTraceIdRepeated(CellsTable,time_min, time_max) %use to debug
     end
 end
 
-% a(23,20)=a(12,12)
-% for x=1:size(differences,1)
-%     for y=1:size(differences,2)
-%         R=differences==differences(x,y);
-%         if sum(R(:)) > 1
-%             sum(R(:))
-%             differences(x,y)
-%         end
-%     end
-% end
