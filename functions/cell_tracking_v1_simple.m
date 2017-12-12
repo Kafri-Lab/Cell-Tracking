@@ -43,13 +43,16 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
           [former_trace_id, former_cell_index_global] = lookup_trace_id(CellsTable, previous_timepoint, former_cell_index);
           [current_trace_id, current_cell_index_global] = lookup_trace_id(CellsTable, current_timepoint, current_cell_index);
           
+          % translation differences between the centroid position of former
+          % cell-current cell pairs to save in diffTable
           centroid_diff=sqrt((abs(CellsTable.Centroid(current_cell_index_global,1)-CellsTable.Centroid(former_cell_index_global,1))).^2 + (abs(CellsTable.Centroid(current_cell_index_global,2)-CellsTable.Centroid(former_cell_index_global,2))).^2);
           newRow = {previous_timepoint,former_trace_id,mindiff,centroid_diff}; % used to aid debugging
           diffTable=[diffTable;newRow]; % used to aid debugging
 
-          if strcmp(current_trace_id,'None') & mindiff>2 & centroid_diff>200 % only set the trace to the best/first match. TODO: IS THIS REALLY NEEDED
-            %CellsTable.Trace(current_cell_index_global) = {uuid()};
-          elseif strcmp(current_trace_id,'None') & mindiff<2 & centroid_diff<200
+          % Only former cell - current cell pairs that satisfy this
+          % condition will be matched. Analysis showed that cells that are
+          % tracked correctly tend to meet this trend.
+          if strcmp(current_trace_id,'None') & mindiff<2 & centroid_diff<200
             CellsTable.Trace(current_cell_index_global) = former_trace_id;
             CellsTable.TraceUsed(former_cell_index_global) = 1;
           end
@@ -62,6 +65,7 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
             lostCell_X = lostCellsTable.Centroid(i,1);
             lostCell_Y = lostCellsTable.Centroid(i,2);
             centroid_diffs=[];
+            %% Compare the translation of former-current cell pairs 
             for j=1:size(currentTimepointTable,1)
                 currentCell_X = currentTimepointTable.Centroid(j,1);
                 currentCell_Y = currentTimepointTable.Centroid(j,2);
@@ -69,13 +73,14 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
                 centroid_diffs=[centroid_diffs;centroid_diff];
             end
             closest_cell_index=find(centroid_diffs==min(centroid_diffs));
-            if min(centroid_diffs)<200 %& mindiff<2 
+            %% Assign trace id if the following condition is met
+            if min(centroid_diffs)<200 %& mindiff<2 might be a good additional condition to add
                 [global_lostCell_index] = find_index(CellsTable,previous_timepoint-1,0,i);
                 [global_currentCell_index] = find_index(CellsTable,current_timepoint,0,closest_cell_index,'None');
                 if strcmp(CellsTable.Trace(global_currentCell_index),'None')
                     CellsTable.Trace(global_currentCell_index)=CellsTable.Trace(global_lostCell_index);
                     CellsTable.TraceUsed(global_lostCell_index)=1;
-                    currentTimepointTable(j,:) = [];
+                    currentTimepointTable(j,:) = []; %% remove current cell so that it cannot be reassigned a new trace
                 end
             end 
         end
