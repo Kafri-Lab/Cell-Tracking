@@ -37,6 +37,8 @@ function [raw_differences, normalized_differences, composite_differences] = Diff
   count = 1; % this is needed because "t" in the loop may not start at 1, we could
   % if we really wanted to start processing timepoints in the middle of the sequence
   for t=min(SubsetTable.Time):max(SubsetTable.Time)-1
+    fprintf('Calculating differences between frames %d and %d...\n', t, t+1)
+
     % Get only cells (ie. table rows) at T and T+1
     T1 = SubsetTable(SubsetTable.Time==t,:);
     T2 = SubsetTable(SubsetTable.Time==t+1,:);

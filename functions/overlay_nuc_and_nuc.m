@@ -1,9 +1,11 @@
 function overlay = overlay_nuc_and_nuc(CellsTable, imgs)
 
+
     labelled_by_trace = zeros(size(imgs,1), size(imgs,2), size(imgs,3), 3);
    
     for t=min(CellsTable.Time):max(CellsTable.Time)
-        
+        fprintf('Visualizing rgb overlay for frame %d...\n', t)
+
         ObjectsInFrame = CellsTable(CellsTable.Time==t,:); %ResultTable for cells in frame
         boundaries_nuc = ObjectsInFrame.nuc_boundaries; %nuclei boundaries
         NumberOfCells = size(boundaries_nuc, 1);

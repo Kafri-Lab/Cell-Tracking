@@ -11,7 +11,9 @@ function [CellsTable,diffTable] = cell_tracking_v1_simple(CellsTable, composite_
   first_timepoint_cells = 1:sum(CellsTable.Time==min(CellsTable.Time));
   CellsTable.Trace(first_timepoint_cells) = uuid_array(sum(CellsTable.Time==min(CellsTable.Time)))';
   % CREATE TRACES BY FINDING CLOSEST MATCHING OBSERVATIONS FIRST BETWEEN T AND T+1
-  for timepoint=1:19%length(composite_differences)
+  for timepoint=1:length(composite_differences)
+    fprintf('Finding matching cells between frames %d and %d...\n', timepoint, timepoint+1)
+
     previous_timepoint = timepoint+min(CellsTable.Time)-1;
     current_timepoint = timepoint+min(CellsTable.Time); 
     differences = composite_differences{timepoint};
